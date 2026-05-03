@@ -1,0 +1,17 @@
+{
+  "name": "civic-flow",
+  "version": "1.0.0",
+  "description": "Civic-Flow: Autonomous Election Navigator",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "jest --verbose",
+    "test:coverage": "jest --coverage --verbose"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0"
+  }
+}
