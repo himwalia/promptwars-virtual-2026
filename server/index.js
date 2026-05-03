@@ -1,7 +1,14 @@
 const express = require('express');
+const path = require('path');
+const { handleExplainRequest, resolveApiKey, VALID_TOPICS } = require('./lib/geminiAdapter');
+const { calculateScore } = require('./lib/confidenceScore');
+const { getState, KnowledgeStateMachine, buildPromptForState } = require('./lib/knowledgeState');
 
 const app = express();
 app.use(express.json());
+
+// Serve static frontend files from client/
+app.use(express.static(path.join(__dirname, '..', 'client')));
 
 // Hybrid Quota Architecture: Check for 'x-api-key' header (BYOK pattern)
 app.use((req, res, next) => {
@@ -10,14 +17,80 @@ app.use((req, res, next) => {
   next();
 });
 
-// Hello World baseline endpoint
-app.get('/', (req, res) => {
-  res.status(200).send('Hello World - Civic-Flow Functional Baseline Active');
+// In-memory session store (per-user state machine)
+const sessions = new Map();
+
+function getSession(sessionId) {
+  if (!sessions.has(sessionId)) {
+    sessions.set(sessionId, {
+      machine: new KnowledgeStateMachine({ hysteresisBuffer: 0.02 }),
+      interactions: [],
+      totalCorrect: 0,
+      totalQuestions: 0,
+    });
+  }
+  return sessions.get(sessionId);
+}
+
+// POST /api/explain — Get AI explanation for a topic
+app.post('/api/explain', handleExplainRequest);
+
+// POST /api/session/start — Start or resume a session for a topic
+app.post('/api/session/start', (req, res) => {
+  const { topic, sessionId } = req.body || {};
+  if (!topic || !VALID_TOPICS.includes(topic)) {
+    return res.status(400).json({ error: 'Invalid or missing topic.' });
+  }
+  const id = sessionId || `s_${Date.now()}`;
+  const session = getSession(id);
+  const state = session.machine.getCurrentState();
+  const score = session.machine.currentScore;
+  return res.json({ sessionId: id, state, score, topic });
+});
+
+// POST /api/answer — Submit an answer, update confidence & state
+app.post('/api/answer', (req, res) => {
+  const { sessionId, correct, topic } = req.body || {};
+  if (!sessionId) return res.status(400).json({ error: 'Missing sessionId.' });
+  const session = getSession(sessionId);
+  session.totalQuestions += 1;
+  if (correct) session.totalCorrect += 1;
+  session.interactions.push({
+    correct: !!correct,
+    timestamp: Date.now(),
+    difficulty: 1.0,
+  });
+  const score = calculateScore({
+    correctAnswers: session.totalCorrect,
+    totalQuestions: session.totalQuestions,
+    details: session.interactions,
+  });
+  const result = session.machine.evaluate(score);
+  return res.json({
+    sessionId,
+    score: Math.round(score * 100) / 100,
+    state: result.state,
+    changed: result.changed,
+    previousState: result.previousState,
+    totalCorrect: session.totalCorrect,
+    totalQuestions: session.totalQuestions,
+    topic,
+  });
+});
+
+// GET /api/topics — List valid topics
+app.get('/api/topics', (_req, res) => {
+  res.json({ topics: VALID_TOPICS });
 });
 
 // Health check endpoint for Cloud Run
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).send('OK');
+});
+
+// Fallback: serve index.html for SPA-style navigation
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
 });
 
 // Port and Host binding strictly adhering to Cloud Run constraints

@@ -4,6 +4,15 @@
 
 ---
 
+## 🌟 Features
+
+- **Dynamic Parallax Timeline**: A visually stunning, scroll-driven UI that visually guides users through the 5 phases of the election process (Registration, Primaries, Campaigning, Election Day, Certification) with SVG-powered glowing progress.
+- **Adaptive AI Side-Panel**: Engaging with timeline nodes summons an interactive panel powered by Gemini 1.5 Pro, delivering explanations that adapt instantly to your "Civic Knowledge State".
+- **Hybrid BYOK Architecture (Bring Your Own Key)**: Zero-friction onboarding using our secure backend API key, combined with an "Advanced Settings" modal for power users to inject their own Gemini API Key directly into their session.
+- **Strict Accessibility**: Fully WCAG 2.1 AA compliant, featuring keyboard-navigable node buttons, persistent focus-visible rings, and `aria-live` announcements for screen readers.
+
+---
+
 ## 🚀 Engineering Highlights
 
 - **98.56% Test Coverage** — 62 passing Jest tests across 6 suites covering confidence scoring, knowledge state transitions, hysteresis stability, BYOK quota routing, and Gemini adapter error handling.
@@ -55,6 +64,12 @@ npm start
 # Run tests with coverage
 npm run test:coverage
 ```
+
+---
+
+## 📸 Screenshots
+
+![Dynamic Parallax Timeline UI](timeline_screenshot.png "Civic-Flow UI Preview")
 
 ---
 

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Civic-Flow: An AI-powered interactive Election Navigator guiding you from Voter Registration to Certification." />
+  <title>Civic-Flow — Autonomous Election Navigator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Skip to main content (WCAG 2.1 AA) -->
+  <a href="#main-timeline" class="skip-link">Skip to Timeline</a>
+
+  <!-- ═══ Top Navigation ═══ -->
+  <nav class="top-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <div class="nav-brand-icon" aria-hidden="true">⚡</div>
+      <span>Civic-Flow</span>
+    </div>
+    <div class="nav-actions">
+      <span id="state-badge" class="nav-state-badge" aria-live="polite">Novice</span>
+      <button id="btn-settings" class="btn-icon" aria-label="Open advanced settings" title="Settings">
+        ⚙
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══ Hero Section ═══ -->
+  <header class="hero" role="banner">
+    <h1>Navigate the <span class="gradient-text">Electoral Process</span></h1>
+    <p>Explore each phase of the election cycle. Click a milestone to unlock AI-powered explanations that adapt to your knowledge level.</p>
+
+    <div class="score-hud" aria-label="Your progress summary">
+      <div class="score-card">
+        <div id="hud-score" class="score-card-value">0.00</div>
+        <div class="score-card-label">Confidence</div>
+      </div>
+      <div class="score-card">
+        <div id="hud-correct" class="score-card-value">0/0</div>
+        <div class="score-card-label">Correct</div>
+      </div>
+      <div class="score-card">
+        <div id="hud-state" class="score-card-value" style="font-size:1rem;">NOVICE</div>
+        <div class="score-card-label">Level</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ Timeline Section ═══ -->
+  <main id="main-timeline" class="timeline-section" role="main">
+    <h2>The Election Timeline</h2>
+
+    <div class="timeline" id="timeline" role="list" aria-label="Election process timeline">
+
+      <!-- SVG progress line -->
+      <svg class="timeline-svg" id="timeline-svg" aria-hidden="true" preserveAspectRatio="none">
+        <line class="track" x1="2" y1="0" x2="2" y2="100%" />
+        <line class="progress" id="svg-progress" x1="2" y1="0" x2="2" y2="100%" />
+      </svg>
+
+      <!-- Node 1: Voter Registration -->
+      <div class="timeline-node" role="listitem">
+        <button class="node-button" id="node-0" data-topic="Voter Registration" aria-label="Explore Voter Registration">
+          📋
+        </button>
+        <div class="node-content">
+          <div class="node-step">Step 1</div>
+          <div class="node-title">Voter Registration</div>
+          <div class="node-desc">Understand eligibility, deadlines, and how to register in your state.</div>
+        </div>
+      </div>
+
+      <!-- Node 2: Primaries -->
+      <div class="timeline-node" role="listitem">
+        <button class="node-button" id="node-1" data-topic="Primaries" aria-label="Explore Primaries">
+          🗳️
+        </button>
+        <div class="node-content">
+          <div class="node-step">Step 2</div>
+          <div class="node-title">Primaries</div>
+          <div class="node-desc">Learn how parties select their candidates through primary elections and caucuses.</div>
+        </div>
+      </div>
+
+      <!-- Node 3: Campaigning -->
+      <div class="timeline-node" role="listitem">
+        <button class="node-button" id="node-2" data-topic="Campaigning" aria-label="Explore Campaigning">
+          📢
+        </button>
+        <div class="node-content">
+          <div class="node-step">Step 3</div>
+          <div class="node-title">Campaigning</div>
+          <div class="node-desc">Discover how campaigns operate — from fundraising to debates to voter outreach.</div>
+        </div>
+      </div>
+
+      <!-- Node 4: Election Day -->
+      <div class="timeline-node" role="listitem">
+        <button class="node-button" id="node-3" data-topic="Election Day" aria-label="Explore Election Day">
+          🏛️
+        </button>
+        <div class="node-content">
+          <div class="node-step">Step 4</div>
+          <div class="node-title">Election Day</div>
+          <div class="node-desc">What happens on Election Day — polling, voting methods, and how results are tallied.</div>
+        </div>
+      </div>
+
+      <!-- Node 5: Certification -->
+      <div class="timeline-node" role="listitem">
+        <button class="node-button" id="node-4" data-topic="Certification" aria-label="Explore Certification">
+          ✅
+        </button>
+        <div class="node-content">
+          <div class="node-step">Step 5</div>
+          <div class="node-title">Certification</div>
+          <div class="node-desc">The final step — how election results are certified and made official.</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ═══ Side Panel ═══ -->
+  <div class="panel-overlay" id="panel-overlay" aria-hidden="true"></div>
+  <aside class="side-panel" id="side-panel" role="complementary" aria-label="Topic explanation panel" aria-hidden="true">
+    <div class="panel-header">
+      <span class="panel-topic" id="panel-topic">Topic</span>
+      <button class="panel-close" id="panel-close" aria-label="Close panel">✕</button>
+    </div>
+    <div class="panel-body" aria-live="polite" aria-atomic="false">
+      <div class="panel-explanation" id="panel-explanation">
+        Click a timeline node to get started.
+      </div>
+      <div id="question-container"></div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary" id="btn-submit" disabled>Submit Answer</button>
+      <button class="btn btn-secondary" id="btn-next">Next Concept</button>
+    </div>
+  </aside>
+
+  <!-- ═══ Settings Modal ═══ -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal">
+      <h2 id="modal-title">⚙ Advanced Settings</h2>
+      <p>Provide your own Gemini API key. It will be stored in your browser session only and used for all AI requests.</p>
+      <div class="key-status" id="key-status">
+        <span class="dot inactive" id="key-dot"></span>
+        <span id="key-status-text">No custom key set — using server default</span>
+      </div>
+      <div class="input-group">
+        <label for="api-key-input">Gemini API Key</label>
+        <input type="password" id="api-key-input" placeholder="AIza..." autocomplete="off" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="btn-save-key">Save Key</button>
+        <button class="btn btn-secondary" id="btn-clear-key">Clear Key</button>
+        <button class="btn btn-secondary" id="btn-close-modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>
