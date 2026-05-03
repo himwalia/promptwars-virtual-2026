@@ -54,10 +54,10 @@ describe('geminiAdapter', () => {
       expect(prompt).toContain('Voter Registration');
     });
 
-    test('TC-5: POLICY_WONK state + "Certification" topic produces legal-framework prompt', () => {
-      const prompt = buildPrompt('POLICY_WONK', 'Certification');
+    test('TC-5: POLICY_WONK state + "Counting & Results" topic produces legal-framework prompt', () => {
+      const prompt = buildPrompt('POLICY_WONK', 'Counting & Results');
       expect(prompt).toMatch(/legal/i);
-      expect(prompt).toContain('Certification');
+      expect(prompt).toContain('Counting & Results');
     });
 
     test('TC-6: invalid topic throws UnknownTopicError', () => {

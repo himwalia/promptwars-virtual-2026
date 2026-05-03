@@ -18,7 +18,7 @@
   let highestUnlocked = 0; // index of highest unlocked node
   const visitedNodes = new Set();
   const EMOJIS = ['📋', '🗳️', '📢', '🏛️', '✅'];
-  const TOPICS = ['Voter Registration', 'Primaries', 'Campaigning', 'Election Day', 'Certification'];
+  const TOPICS = ['Voter Registration', 'Candidate Nomination', 'Campaigning', 'Polling Day', 'Counting & Results'];
 
   // ── DOM Refs ─────────────────────────────────────────────
   const $ = (sel) => document.querySelector(sel);
@@ -55,24 +55,24 @@
   // ── Questions ────────────────────────────────────────────
   const QUESTIONS = {
     'Voter Registration': [
-      { q: 'What is the minimum age to register to vote in most U.S. states?', opts: ['16', '17', '18', '21'], correct: 2 },
-      { q: 'Which federal law established the National Voter Registration Act?', opts: ['Voting Rights Act 1965', 'Motor Voter Act 1993', 'Help America Vote Act 2002', 'Civil Rights Act 1964'], correct: 1 },
+      { q: 'What is the minimum age to be eligible for an ECI Voter ID?', opts: ['16', '18', '21', '25'], correct: 1 },
+      { q: 'Which form is required to apply for a new Voter ID online in India?', opts: ['Form 6', 'Form 7', 'Form 8', 'Form 12'], correct: 0 },
     ],
-    'Primaries': [
-      { q: 'What type of primary allows any registered voter to participate regardless of party?', opts: ['Closed primary', 'Open primary', 'Blanket primary', 'Runoff primary'], correct: 1 },
-      { q: 'What is a caucus?', opts: ['A type of ballot', 'A local party meeting to select candidates', 'A debate format', 'An electoral college session'], correct: 1 },
+    'Candidate Nomination': [
+      { q: 'What is the minimum age required to contest a Lok Sabha election?', opts: ['21', '25', '30', '35'], correct: 1 },
+      { q: 'To whom does a candidate submit their nomination papers?', opts: ['Chief Election Commissioner', 'District Magistrate (Returning Officer)', 'State Governor', 'Chief Minister'], correct: 1 },
     ],
     'Campaigning': [
-      { q: 'Which body regulates federal campaign finance?', opts: ['FCC', 'FEC', 'SEC', 'FTC'], correct: 1 },
-      { q: 'What is a "Super PAC"?', opts: ['A candidate fund', 'An independent expenditure-only committee', 'A government grant', 'A party committee'], correct: 1 },
+      { q: 'What does the Model Code of Conduct (MCC) do?', opts: ['Forces candidates to wear uniforms', 'Sets rules for ethical campaigning and government behavior', 'Limits the number of voters per booth', 'Dictates who can vote'], correct: 1 },
+      { q: 'When must all public campaigning end before polling day?', opts: ['12 hours before', '24 hours before', '48 hours before', '72 hours before'], correct: 2 },
     ],
-    'Election Day': [
-      { q: 'On which day is the U.S. general election traditionally held?', opts: ['First Monday in November', 'First Tuesday after the first Monday in November', 'Last Tuesday in October', 'Second Wednesday in November'], correct: 1 },
-      { q: 'What is an absentee ballot?', opts: ['A provisional ballot', 'A ballot cast before Election Day by mail', 'A digital ballot', 'A ballot for overseas military only'], correct: 1 },
+    'Polling Day': [
+      { q: 'What does VVPAT stand for?', opts: ['Voter Verified Paper Audit Trail', 'Visual Voting Pattern Assessment Tool', 'Valid Vote Processing And Testing', 'Voice Verified Polling Audit Trail'], correct: 0 },
+      { q: 'How many votes can one EVM (Electronic Voting Machine) record maximum?', opts: ['1000', '2000', '3840', '5000'], correct: 2 },
     ],
-    'Certification': [
-      { q: 'Which body certifies the presidential election results?', opts: ['The Supreme Court', 'The Senate alone', 'Congress in a joint session', 'The FEC'], correct: 2 },
-      { q: 'When does the Electoral College typically cast their votes?', opts: ['Election Night', 'First Monday after the second Wednesday in December', 'January 6', 'Inauguration Day'], correct: 1 },
+    'Counting & Results': [
+      { q: 'Who issues the final Certificate of Election to the winning candidate?', opts: ['The President', 'The Chief Justice', 'The Returning Officer', 'The Prime Minister'], correct: 2 },
+      { q: 'What happens if the "NOTA" (None Of The Above) option gets the highest votes?', opts: ['Fresh elections are held immediately', 'The candidate with the second-highest votes is declared the winner', 'The constituency is left unrepresented', 'The Governor appoints a representative'], correct: 1 },
     ],
   };
 
@@ -318,14 +318,38 @@
   }
 
   // ── Mock Google Login ────────────────────────────────────
-  function loginGoogle() {
-    // Create avatar in nav
-    const avatar = document.createElement('div');
-    avatar.className = 'user-avatar';
-    avatar.textContent = 'U';
-    avatar.title = 'Logged in as User';
-    navActions.insertBefore(avatar, navActions.firstChild);
-    dismissOnboarding();
+  async function loginGoogle() {
+    if (window.firebaseAuth) {
+      try {
+        const { auth, provider, signInWithPopup } = window.firebaseAuth;
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        // Create avatar in nav
+        const avatar = document.createElement('div');
+        avatar.className = 'user-avatar';
+        avatar.textContent = user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U';
+        avatar.title = `Logged in as ${user.displayName || 'User'}`;
+        
+        // Replace if exists
+        const existing = document.querySelector('.user-avatar');
+        if (existing) existing.remove();
+        
+        navActions.insertBefore(avatar, navActions.firstChild);
+        dismissOnboarding();
+      } catch (error) {
+        console.error("Firebase Login Error:", error);
+        alert("Failed to sign in with Google: " + error.message);
+      }
+    } else {
+      // Fallback if firebase failed to load
+      const avatar = document.createElement('div');
+      avatar.className = 'user-avatar';
+      avatar.textContent = 'U';
+      avatar.title = 'Logged in as User';
+      navActions.insertBefore(avatar, navActions.firstChild);
+      dismissOnboarding();
+    }
   }
 
   function dismissOnboarding() {

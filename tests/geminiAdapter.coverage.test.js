@@ -63,7 +63,7 @@ describe('geminiAdapter — coverage supplements', () => {
   // Cover handleExplainRequest — 403 when no API key
   test('handleExplainRequest returns 403 when no API key is available', async () => {
     delete process.env.GEMINI_API_KEY;
-    const req = { headers: {}, body: { topic: 'Primaries', state: 'NOVICE' } };
+    const req = { headers: {}, body: { topic: 'Candidate Nomination', state: 'NOVICE' } };
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
@@ -105,7 +105,7 @@ describe('geminiAdapter — coverage supplements', () => {
       json: async () => ({}),
     }));
 
-    const req = { headers: {}, body: { topic: 'Primaries', state: 'NOVICE' } };
+    const req = { headers: {}, body: { topic: 'Candidate Nomination', state: 'NOVICE' } };
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),

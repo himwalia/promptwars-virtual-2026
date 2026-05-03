@@ -17,10 +17,10 @@ class UnknownTopicError extends Error {
 /** Valid election topics for the Civic-Flow timeline */
 const VALID_TOPICS = Object.freeze([
   'Voter Registration',
-  'Primaries',
+  'Candidate Nomination',
   'Campaigning',
-  'Election Day',
-  'Certification',
+  'Polling Day',
+  'Counting & Results',
 ]);
 
 /**

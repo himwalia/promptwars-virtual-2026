@@ -5,13 +5,13 @@
 
 ## 2. Extraordinary UI Spec
 - **Dynamic Parallax Timeline**: A visually stunning, scroll-driven parallax timeline representing the election process:
-  - Voter Registration
-  - Primaries
+  - Voter Registration (ECI Voter ID)
+  - Candidate Nomination
   - Campaigning
-  - Election Day
-  - Certification
+  - Polling Day (EVMs/VVPAT)
+  - Counting & Results Certification
 - **Interactive SVG Path**: Nodes in the timeline are connected via a dynamic, interactive SVG path. 
-- **Adaptive AI Side-Panel**: When a node is clicked, a sleek side-panel slides in. Powered by **Gemini 1.5 Pro**, it dynamically explains the rules and context, automatically adapting its tone and depth to the user's "Civic Knowledge State" (ranging from *Novice* to *Policy Wonk*).
+- **Adaptive AI Side-Panel**: When a node is clicked, a sleek side-panel slides in. Powered by **Gemini 1.5 Pro**, it dynamically explains the rules and context, automatically adapting its tone and depth to the user's "Civic Knowledge State" (ranging from *Novice* to *Policy Wonk*). All explanations strictly follow the Indian Election Commission (ECI) guidelines.
 
 ## 3. Google Services Stack
 - **Firebase Auth**: Secure Google Login integration.

@@ -7,6 +7,30 @@
   <title>Civic-Flow — Autonomous Election Navigator</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
+    // Use environment variables or a default config placeholder if none provided.
+    // For PromptWars demo, we must rely on a valid config if real auth is requested,
+    // but the user's prompt suggests they want to "trigger the Firebase Auth signInWithPopup(googleProvider) function".
+    const firebaseConfig = {
+      apiKey: "AIzaSyDummyKeyForPromptWars",
+      authDomain: "promptwars-virtual-2026.firebaseapp.com",
+      projectId: "promptwars-virtual-2026",
+      storageBucket: "promptwars-virtual-2026.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    window.firebaseAuth = { auth, provider, signInWithPopup, onAuthStateChanged, signOut };
+  </script>
 </head>
 <body>
 
@@ -27,8 +51,8 @@
   <!-- ═══ Hero Section ═══ -->
   <header class="hero" role="banner">
     <img src="hero.png" alt="Civic-Flow Election Journey" class="hero-illustration" />
-    <h1>Your AI Guide to the<br><span class="gradient-text">American Election</span></h1>
-    <p>Walk through every phase of the U.S. electoral process — from registration to certification. AI-powered explanations adapt to your knowledge level.</p>
+    <h1>Indian Election:<br><span class="gradient-text">Your AI Guide to the Democratic Process</span></h1>
+    <p>Walk through every phase of the Indian electoral process — from ECI registration to certification. AI-powered explanations adapt to your knowledge level.</p>
 
     <div class="score-hud" aria-label="Your progress summary">
       <div class="score-card">
@@ -73,17 +97,17 @@
         <div class="node-content">
           <div class="node-step">Step 1</div>
           <div class="node-title">Voter Registration</div>
-          <div class="node-desc">Understand eligibility, deadlines, and how to register in your state.</div>
+          <div class="node-desc">Understand eligibility, deadlines, and how to get your ECI Voter ID.</div>
         </div>
       </div>
 
-      <!-- Node 2: Primaries (LOCKED) -->
+      <!-- Node 2: Candidate Nomination (LOCKED) -->
       <div class="timeline-node locked" role="listitem">
-        <button class="node-button" id="node-1" data-topic="Primaries" aria-label="Explore Primaries" disabled>🔒</button>
+        <button class="node-button" id="node-1" data-topic="Candidate Nomination" aria-label="Explore Candidate Nomination" disabled>🔒</button>
         <div class="node-content">
           <div class="node-step">Step 2</div>
-          <div class="node-title">Primaries</div>
-          <div class="node-desc">Learn how parties select their candidates through primary elections and caucuses.</div>
+          <div class="node-title">Candidate Nomination</div>
+          <div class="node-desc">Learn how candidates file their nominations and the scrutiny process by Returning Officers.</div>
         </div>
       </div>
 
@@ -93,27 +117,27 @@
         <div class="node-content">
           <div class="node-step">Step 3</div>
           <div class="node-title">Campaigning</div>
-          <div class="node-desc">Discover how campaigns operate — from fundraising to debates to voter outreach.</div>
+          <div class="node-desc">Discover how campaigns operate under the Model Code of Conduct.</div>
         </div>
       </div>
 
-      <!-- Node 4: Election Day (LOCKED) -->
+      <!-- Node 4: Polling Day (LOCKED) -->
       <div class="timeline-node locked" role="listitem">
-        <button class="node-button" id="node-3" data-topic="Election Day" aria-label="Explore Election Day" disabled>🔒</button>
+        <button class="node-button" id="node-3" data-topic="Polling Day" aria-label="Explore Polling Day" disabled>🔒</button>
         <div class="node-content">
           <div class="node-step">Step 4</div>
-          <div class="node-title">Election Day</div>
-          <div class="node-desc">What happens on Election Day — polling, voting methods, and how results are tallied.</div>
+          <div class="node-title">Polling Day</div>
+          <div class="node-desc">What happens at polling booths — the use of EVMs and VVPATs.</div>
         </div>
       </div>
 
-      <!-- Node 5: Certification (LOCKED) -->
+      <!-- Node 5: Counting & Results (LOCKED) -->
       <div class="timeline-node locked" role="listitem">
-        <button class="node-button" id="node-4" data-topic="Certification" aria-label="Explore Certification" disabled>🔒</button>
+        <button class="node-button" id="node-4" data-topic="Counting & Results" aria-label="Explore Counting & Results" disabled>🔒</button>
         <div class="node-content">
           <div class="node-step">Step 5</div>
-          <div class="node-title">Certification</div>
-          <div class="node-desc">The final step — how election results are certified and made official.</div>
+          <div class="node-title">Counting & Results</div>
+          <div class="node-desc">The final step — how votes are counted and results are certified by the ECI.</div>
         </div>
       </div>
 
@@ -144,7 +168,7 @@
   <div class="onboarding-overlay" id="onboarding-overlay" role="dialog" aria-modal="true" aria-labelledby="onboarding-title" aria-hidden="false">
     <div class="onboarding-modal">
       <h2 id="onboarding-title">Welcome to Civic-Flow</h2>
-      <p>Your AI-powered guide to the U.S. electoral process. Walk through every phase from voter registration to final certification.</p>
+      <p>Your AI-powered guide to the Indian electoral process. Walk through every phase from ECI voter registration to final certification.</p>
 
       <div class="onboarding-actions">
         <button class="btn btn-google" id="btn-login-google">

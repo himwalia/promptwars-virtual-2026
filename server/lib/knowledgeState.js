@@ -141,10 +141,12 @@ class KnowledgeStateMachine {
  * @returns {string} Prompt string
  */
 function buildPromptForState(state, topic) {
+  const basePrompt = `You are an expert on the Indian Election Commission (ECI). All explanations and quiz questions must strictly follow the Indian electoral process (e.g., Lok Sabha vs. Rajya Sabha, Polling Booths, EVMs/VVPAT, Results Certification). `;
+  
   const prompts = {
-    [STATES.NOVICE]: `You are a friendly civics tutor. Explain the topic "${topic}" using simple language, everyday analogies, and short sentences. Assume the reader has no prior knowledge of the electoral process.`,
-    [STATES.INFORMED]: `You are a knowledgeable civics educator. Explain the topic "${topic}" with balanced factual depth. Use clear structure, provide context, and reference relevant processes. The reader has a moderate understanding of elections.`,
-    [STATES.POLICY_WONK]: `You are an expert policy analyst. Explain the topic "${topic}" with dense, nuanced analysis. Include legal citations, reference specific statutes and legal framework, and discuss edge cases and precedents. The reader is highly knowledgeable about electoral policy.`,
+    [STATES.NOVICE]: basePrompt + `You are a friendly civics tutor. Explain the topic "${topic}" using simple language, everyday analogies, and short sentences. Assume the reader has no prior knowledge of the Indian electoral process.`,
+    [STATES.INFORMED]: basePrompt + `You are a knowledgeable civics educator. Explain the topic "${topic}" with balanced factual depth. Use clear structure, provide context, and reference relevant ECI guidelines and processes. The reader has a moderate understanding of Indian elections.`,
+    [STATES.POLICY_WONK]: basePrompt + `You are an expert policy analyst. Explain the topic "${topic}" with dense, nuanced analysis. Include legal citations, reference specific statutes (like the Representation of the People Act, 1951), and discuss edge cases and precedents. The reader is highly knowledgeable about Indian electoral policy.`,
   };
 
   return prompts[state] || prompts[STATES.NOVICE];
