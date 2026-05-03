@@ -13,22 +13,19 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-    async function initFirebase() {
-      try {
-        const res = await fetch('/api/firebase-config');
-        const firebaseConfig = await res.json();
+    // Fetch config dynamically from server
+    try {
+      const response = await fetch('/api/firebase-config');
+      const firebaseConfig = await response.json();
+      
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        window.firebaseAuth = { auth, provider, signInWithPopup, onAuthStateChanged, signOut };
-      } catch (err) {
-        console.error("Failed to initialize Firebase:", err);
-      }
+      window.firebaseAuth = { auth, provider, signInWithPopup, onAuthStateChanged, signOut };
+    } catch (e) {
+      console.error("Failed to load Firebase config:", e);
     }
-
-    initFirebase();
   </script>
 </head>
 <body>

@@ -340,8 +340,8 @@
       } catch (error) {
         console.error("Firebase Login Error Code:", error.code);
         console.error("Firebase Login Error Message:", error.message);
-        console.error("Full Error:", error);
-        alert("Failed to sign in with Google: " + error.message + " (" + (error.code || 'unknown') + ")");
+        console.error("Full Firebase Error:", error);
+        alert("Failed to sign in with Google: " + error.message);
       }
     } else {
       // Fallback if firebase failed to load

@@ -83,7 +83,7 @@ app.get('/api/topics', (_req, res) => {
   res.json({ topics: VALID_TOPICS });
 });
 
-// GET /api/firebase-config — Provide Firebase config to client
+// GET /api/firebase-config
 app.get('/api/firebase-config', (_req, res) => {
   res.json({
     apiKey: process.env.FIREBASE_API_KEY || "AIzaSyDummyKeyForPromptWars",
