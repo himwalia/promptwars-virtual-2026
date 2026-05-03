@@ -29,14 +29,23 @@ const VALID_TOPICS = Object.freeze([
  * @returns {string|null} The resolved API key or null
  */
 function resolveApiKey(req) {
+  // Strictly prioritize the incoming request header
   const headerKey = req.headers && req.headers['x-api-key'];
   if (headerKey && headerKey.trim().length > 0) {
     return headerKey.trim();
   }
+  
+  // Fallback to middleware set key
+  if (req.geminiApiKey && req.geminiApiKey.trim().length > 0) {
+    return req.geminiApiKey.trim();
+  }
+
+  // Final fallback to process env
   const envKey = process.env.GEMINI_API_KEY;
   if (envKey && envKey.trim().length > 0) {
     return envKey.trim();
   }
+  
   return null;
 }
 
