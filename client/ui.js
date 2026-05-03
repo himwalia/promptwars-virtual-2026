@@ -1,9 +1,8 @@
 /**
- * ui.js — Civic-Flow UI Controller
- * Manages timeline interaction, scroll-based SVG progress, side panel,
- * question rendering, settings modal, and accessibility features.
+ * ui.js — Civic-Flow UI Controller v2
+ * Complete rewrite: guided progression, markdown rendering,
+ * satisfying animations, and mock Google Sign-In.
  */
-
 (() => {
   'use strict';
 
@@ -16,7 +15,10 @@
   let activeTopic = null;
   let selectedAnswer = null;
   let currentCorrectIndex = null;
+  let highestUnlocked = 0; // index of highest unlocked node
   const visitedNodes = new Set();
+  const EMOJIS = ['📋', '🗳️', '📢', '🏛️', '✅'];
+  const TOPICS = ['Voter Registration', 'Primaries', 'Campaigning', 'Election Day', 'Certification'];
 
   // ── DOM Refs ─────────────────────────────────────────────
   const $ = (sel) => document.querySelector(sel);
@@ -42,15 +44,15 @@
   const hudScore = $('#hud-score');
   const hudCorrect = $('#hud-correct');
   const hudState = $('#hud-state');
-  
   const onboardingOverlay = $('#onboarding-overlay');
   const btnLoginGoogle = $('#btn-login-google');
   const btnStartGuest = $('#btn-start-guest');
   const onboardingKeyStatus = $('#onboarding-key-status');
   const onboardingModelStatus = $('#onboarding-model-status');
   const onboardingEditSettings = $('#onboarding-edit-settings');
+  const navActions = $('#nav-actions');
 
-  // ── Sample Questions per Topic ───────────────────────────
+  // ── Questions ────────────────────────────────────────────
   const QUESTIONS = {
     'Voter Registration': [
       { q: 'What is the minimum age to register to vote in most U.S. states?', opts: ['16', '17', '18', '21'], correct: 2 },
@@ -77,15 +79,15 @@
   // ── SVG Scroll Progress ──────────────────────────────────
   function updateScrollProgress() {
     const timeline = $('#timeline');
+    if (!timeline) return;
     const rect = timeline.getBoundingClientRect();
     const windowH = window.innerHeight;
     const timelineTop = rect.top + window.scrollY;
     const timelineH = rect.height;
     const scrolled = window.scrollY + windowH * 0.5 - timelineTop;
     const pct = Math.max(0, Math.min(1, scrolled / timelineH));
-    const totalLen = timelineH;
-    svgProgress.style.strokeDasharray = totalLen;
-    svgProgress.style.strokeDashoffset = totalLen * (1 - pct);
+    svgProgress.style.strokeDasharray = timelineH;
+    svgProgress.style.strokeDashoffset = timelineH * (1 - pct);
   }
   window.addEventListener('scroll', updateScrollProgress, { passive: true });
   window.addEventListener('resize', updateScrollProgress, { passive: true });
@@ -104,8 +106,9 @@
   function openPanel(topic) {
     activeTopic = topic;
     panelTopic.textContent = topic;
-    panelExplanation.textContent = '';
+    panelExplanation.innerHTML = '';
     panelExplanation.classList.add('loading');
+    panelExplanation.innerHTML = 'Generating explanation <span class="loader-dots"><span></span><span></span><span></span></span>';
     questionContainer.innerHTML = '';
     btnSubmit.disabled = true;
     btnNext.style.display = 'block';
@@ -116,10 +119,7 @@
     sidePanel.classList.add('open');
     sidePanel.setAttribute('aria-hidden', 'false');
     panelOverlay.setAttribute('aria-hidden', 'false');
-
-    // Trap focus into panel
     setTimeout(() => panelClose.focus(), 400);
-
     loadExplanation(topic);
   }
 
@@ -128,7 +128,6 @@
     sidePanel.classList.remove('open');
     sidePanel.setAttribute('aria-hidden', 'true');
     panelOverlay.setAttribute('aria-hidden', 'true');
-    // Return focus to the active node
     const activeBtn = document.querySelector(`.node-button[data-topic="${activeTopic}"]`);
     if (activeBtn) activeBtn.focus();
   }
@@ -136,27 +135,26 @@
   // ── Load AI Explanation ──────────────────────────────────
   async function loadExplanation(topic) {
     try {
-      // Start session
       const session = await CivicAPI.startSession(topic, sessionId);
       sessionId = session.sessionId;
       currentState = session.state;
       currentScore = session.score;
       updateHUD();
 
-      // Get AI explanation
       const result = await CivicAPI.explain(topic, currentState);
       panelExplanation.classList.remove('loading');
-      if (typeof marked !== 'undefined') {
-        panelExplanation.innerHTML = marked.parse(result.explanation);
+
+      // Parse markdown properly
+      if (typeof marked !== 'undefined' && marked.parse) {
+        panelExplanation.innerHTML = marked.parse(result.explanation || '');
       } else {
-        panelExplanation.textContent = result.explanation;
+        panelExplanation.textContent = result.explanation || '';
       }
 
-      // Render question
       renderQuestion(topic);
     } catch (err) {
       panelExplanation.classList.remove('loading');
-      panelExplanation.textContent = `Error: ${err.message}. Please check your API key in Settings.`;
+      panelExplanation.innerHTML = `<p style="color:var(--danger)">⚠ ${err.message}</p><p style="color:var(--text-muted);font-size:0.85rem;">Check your API key in Settings, or try a different model.</p>`;
     }
   }
 
@@ -171,7 +169,8 @@
 
     questionContainer.innerHTML = `
       <div class="question-card">
-        <h3>${qData.q}</h3>
+        <h3>🧠 Test Your Knowledge</h3>
+        <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:14px;">${qData.q}</p>
         <div class="answer-options" role="radiogroup" aria-label="Answer choices">
           ${qData.opts.map((opt, i) => `
             <button class="answer-option" data-index="${i}" role="radio" aria-checked="false">
@@ -188,9 +187,7 @@
     });
   }
 
-  // ── Answer Selection ─────────────────────────────────────
   function selectAnswer(btn) {
-    // Deselect all
     questionContainer.querySelectorAll('.answer-option').forEach((b) => {
       b.classList.remove('selected');
       b.setAttribute('aria-checked', 'false');
@@ -206,7 +203,6 @@
     if (selectedAnswer === null) return;
     const isCorrect = selectedAnswer === currentCorrectIndex;
 
-    // Visual feedback
     questionContainer.querySelectorAll('.answer-option').forEach((btn) => {
       const idx = parseInt(btn.dataset.index, 10);
       btn.disabled = true;
@@ -223,18 +219,16 @@
       totalQuestions = result.totalQuestions;
       updateHUD();
 
-      // Mark node as visited
-      const nodeIdx = Array.from(nodeButtons).findIndex(
-        (b) => b.dataset.topic === activeTopic
-      );
+      const nodeIdx = TOPICS.indexOf(activeTopic);
       if (nodeIdx >= 0) {
         visitedNodes.add(nodeIdx);
+        nodeButtons[nodeIdx].classList.remove('active');
         nodeButtons[nodeIdx].classList.add('visited');
-        
-        // Show unlock next button if not the last node
-        if (nodeIdx < nodeButtons.length - 1) {
+
+        // Show "Unlock Next Phase" if there's a next locked node
+        if (nodeIdx < nodeButtons.length - 1 && nodeIdx >= highestUnlocked) {
           btnNext.style.display = 'none';
-          btnUnlockNext.style.display = 'block';
+          btnUnlockNext.style.display = 'flex';
         }
       }
     } catch (err) {
@@ -242,32 +236,34 @@
     }
   }
 
+  // ── Unlock Next Phase ────────────────────────────────────
   function unlockNextPhase() {
-    if (!activeTopic) return;
-    const topics = ['Voter Registration', 'Primaries', 'Campaigning', 'Election Day', 'Certification'];
-    const emojis = ['📋', '🗳️', '📢', '🏛️', '✅'];
-    const currentIdx = topics.indexOf(activeTopic);
+    const currentIdx = TOPICS.indexOf(activeTopic);
     const nextIdx = currentIdx + 1;
-    
-    if (nextIdx < topics.length) {
-      const nextBtn = nodeButtons[nextIdx];
-      const nextNode = nextBtn.closest('.timeline-node');
-      
-      // Unlock it
-      nextBtn.disabled = false;
-      nextBtn.textContent = emojis[nextIdx];
-      nextNode.classList.remove('locked');
-      
-      closePanel();
+    if (nextIdx >= TOPICS.length) return;
+
+    const nextBtn = nodeButtons[nextIdx];
+    const nextNode = nextBtn.closest('.timeline-node');
+
+    // Unlock with animation
+    nextBtn.disabled = false;
+    nextBtn.textContent = EMOJIS[nextIdx];
+    nextNode.classList.remove('locked');
+    nextNode.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    nextNode.style.opacity = '1';
+    highestUnlocked = nextIdx;
+
+    closePanel();
+
+    // Auto-scroll and auto-open
+    setTimeout(() => {
+      nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => {
-        nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => {
-          nodeButtons.forEach((b) => b.classList.remove('active'));
-          nextBtn.classList.add('active');
-          openPanel(topics[nextIdx]);
-        }, 500);
-      }, 300);
-    }
+        nodeButtons.forEach((b) => b.classList.remove('active'));
+        nextBtn.classList.add('active');
+        openPanel(TOPICS[nextIdx]);
+      }, 600);
+    }, 400);
   }
 
   // ── Settings Modal ───────────────────────────────────────
@@ -289,19 +285,14 @@
     const dot = $('#key-dot');
     const text = $('#key-status-text');
     if (CivicAPI.hasCustomKey()) {
-      dot.classList.remove('inactive');
-      dot.classList.add('active');
+      dot.classList.remove('inactive'); dot.classList.add('active');
       text.textContent = 'Custom key active — using your key';
-      onboardingKeyStatus.textContent = 'API key is configured (Custom Key)';
-      onboardingKeyStatus.style.color = 'var(--accent)';
+      onboardingKeyStatus.textContent = '✅ API key is configured (Custom Key)';
     } else {
-      dot.classList.remove('active');
-      dot.classList.add('inactive');
+      dot.classList.remove('active'); dot.classList.add('inactive');
       text.textContent = 'No custom key set — using server default';
-      onboardingKeyStatus.textContent = 'API key is configured (Server Default)';
-      onboardingKeyStatus.style.color = 'var(--text-muted)';
+      onboardingKeyStatus.textContent = '✅ API key is configured (Server Default)';
     }
-    
     const models = {
       'gemini-3.1-pro-preview': 'Gemini 3.1 Pro Preview',
       'gemini-3.1-flash-lite-preview': 'Gemini 3.1 Flash Lite Preview',
@@ -315,10 +306,7 @@
   function saveKey() {
     CivicAPI.setModel(modelSelect.value);
     const val = apiKeyInput.value;
-    if (val && val.trim()) {
-      CivicAPI.setApiKey(val);
-      apiKeyInput.value = '';
-    }
+    if (val && val.trim()) { CivicAPI.setApiKey(val); apiKeyInput.value = ''; }
     updateKeyStatus();
     closeSettings();
   }
@@ -329,7 +317,29 @@
     updateKeyStatus();
   }
 
-  // ── Keyboard Handling (Escape to close) ──────────────────
+  // ── Mock Google Login ────────────────────────────────────
+  function loginGoogle() {
+    // Create avatar in nav
+    const avatar = document.createElement('div');
+    avatar.className = 'user-avatar';
+    avatar.textContent = 'U';
+    avatar.title = 'Logged in as User';
+    navActions.insertBefore(avatar, navActions.firstChild);
+    dismissOnboarding();
+  }
+
+  function dismissOnboarding() {
+    onboardingOverlay.classList.remove('open');
+    onboardingOverlay.setAttribute('aria-hidden', 'true');
+    // Auto-open the first node after a brief delay for wow-effect
+    setTimeout(() => {
+      nodeButtons[0].classList.add('active');
+      nodeButtons[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => openPanel(TOPICS[0]), 400);
+    }, 500);
+  }
+
+  // ── Keyboard ─────────────────────────────────────────────
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (modalOverlay.classList.contains('open')) closeSettings();
@@ -340,12 +350,14 @@
   // ── Event Bindings ───────────────────────────────────────
   nodeButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
+      if (btn.disabled) return;
       nodeButtons.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       openPanel(btn.dataset.topic);
     });
   });
 
+  panelClose.addEventListener('click', closePanel);
   panelOverlay.addEventListener('click', closePanel);
   btnSubmit.addEventListener('click', submitAnswer);
   btnNext.addEventListener('click', closePanel);
@@ -354,33 +366,8 @@
   btnSaveKey.addEventListener('click', saveKey);
   btnClearKey.addEventListener('click', clearKey);
   btnCloseModal.addEventListener('click', closeSettings);
-
-  // Onboarding Events
-  function startApp() {
-    onboardingOverlay.classList.remove('open');
-    onboardingOverlay.setAttribute('aria-hidden', 'true');
-  }
-  
-  function loginGoogle() {
-    const navActions = $('.nav-actions');
-    const avatar = document.createElement('div');
-    avatar.style.width = '32px';
-    avatar.style.height = '32px';
-    avatar.style.borderRadius = '50%';
-    avatar.style.background = 'var(--accent)';
-    avatar.style.color = 'white';
-    avatar.style.display = 'flex';
-    avatar.style.alignItems = 'center';
-    avatar.style.justifyContent = 'center';
-    avatar.style.fontWeight = 'bold';
-    avatar.textContent = 'U';
-    avatar.title = 'Logged in as User';
-    navActions.insertBefore(avatar, navActions.firstChild);
-    startApp();
-  }
-
   btnLoginGoogle.addEventListener('click', loginGoogle);
-  btnStartGuest.addEventListener('click', startApp);
+  btnStartGuest.addEventListener('click', dismissOnboarding);
   onboardingEditSettings.addEventListener('click', openSettings);
 
   // ── Init ─────────────────────────────────────────────────
