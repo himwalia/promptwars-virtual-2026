@@ -6,6 +6,7 @@
   <meta name="description" content="Civic-Flow: An AI-powered interactive Election Navigator guiding you from Voter Registration to Certification." />
   <title>Civic-Flow — Autonomous Election Navigator</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -15,7 +16,7 @@
   <!-- ═══ Top Navigation ═══ -->
   <nav class="top-nav" role="navigation" aria-label="Main navigation">
     <div class="nav-brand">
-      <div class="nav-brand-icon" aria-hidden="true">⚡</div>
+      <img src="logo.png" alt="Civic-Flow Logo" class="nav-brand-logo" />
       <span>Civic-Flow</span>
     </div>
     <div class="nav-actions">
@@ -72,9 +73,9 @@
       </div>
 
       <!-- Node 2: Primaries -->
-      <div class="timeline-node" role="listitem">
-        <button class="node-button" id="node-1" data-topic="Primaries" aria-label="Explore Primaries">
-          🗳️
+      <div class="timeline-node locked" role="listitem">
+        <button class="node-button" id="node-1" data-topic="Primaries" aria-label="Explore Primaries" disabled>
+          🔒
         </button>
         <div class="node-content">
           <div class="node-step">Step 2</div>
@@ -84,9 +85,9 @@
       </div>
 
       <!-- Node 3: Campaigning -->
-      <div class="timeline-node" role="listitem">
-        <button class="node-button" id="node-2" data-topic="Campaigning" aria-label="Explore Campaigning">
-          📢
+      <div class="timeline-node locked" role="listitem">
+        <button class="node-button" id="node-2" data-topic="Campaigning" aria-label="Explore Campaigning" disabled>
+          🔒
         </button>
         <div class="node-content">
           <div class="node-step">Step 3</div>
@@ -96,9 +97,9 @@
       </div>
 
       <!-- Node 4: Election Day -->
-      <div class="timeline-node" role="listitem">
-        <button class="node-button" id="node-3" data-topic="Election Day" aria-label="Explore Election Day">
-          🏛️
+      <div class="timeline-node locked" role="listitem">
+        <button class="node-button" id="node-3" data-topic="Election Day" aria-label="Explore Election Day" disabled>
+          🔒
         </button>
         <div class="node-content">
           <div class="node-step">Step 4</div>
@@ -108,9 +109,9 @@
       </div>
 
       <!-- Node 5: Certification -->
-      <div class="timeline-node" role="listitem">
-        <button class="node-button" id="node-4" data-topic="Certification" aria-label="Explore Certification">
-          ✅
+      <div class="timeline-node locked" role="listitem">
+        <button class="node-button" id="node-4" data-topic="Certification" aria-label="Explore Certification" disabled>
+          🔒
         </button>
         <div class="node-content">
           <div class="node-step">Step 5</div>
@@ -137,7 +138,8 @@
     </div>
     <div class="panel-footer">
       <button class="btn btn-primary" id="btn-submit" disabled>Submit Answer</button>
-      <button class="btn btn-secondary" id="btn-next">Next Concept</button>
+      <button class="btn btn-secondary" id="btn-next">Skip Quiz</button>
+      <button class="btn btn-unlock" id="btn-unlock-next" style="display: none;">Unlock Next Phase ➔</button>
     </div>
   </aside>
 

@@ -29,6 +29,7 @@
   const questionContainer = $('#question-container');
   const btnSubmit = $('#btn-submit');
   const btnNext = $('#btn-next');
+  const btnUnlockNext = $('#btn-unlock-next');
   const panelClose = $('#panel-close');
   const modalOverlay = $('#modal-overlay');
   const btnSettings = $('#btn-settings');
@@ -105,9 +106,10 @@
     panelTopic.textContent = topic;
     panelExplanation.textContent = '';
     panelExplanation.classList.add('loading');
-    panelExplanation.innerHTML = 'Generating explanation <span class="loader-dots"><span></span><span></span><span></span></span>';
     questionContainer.innerHTML = '';
     btnSubmit.disabled = true;
+    btnNext.style.display = 'block';
+    btnUnlockNext.style.display = 'none';
     selectedAnswer = null;
 
     panelOverlay.classList.add('open');
@@ -144,7 +146,11 @@
       // Get AI explanation
       const result = await CivicAPI.explain(topic, currentState);
       panelExplanation.classList.remove('loading');
-      panelExplanation.textContent = result.explanation;
+      if (typeof marked !== 'undefined') {
+        panelExplanation.innerHTML = marked.parse(result.explanation);
+      } else {
+        panelExplanation.textContent = result.explanation;
+      }
 
       // Render question
       renderQuestion(topic);
@@ -224,25 +230,44 @@
       if (nodeIdx >= 0) {
         visitedNodes.add(nodeIdx);
         nodeButtons[nodeIdx].classList.add('visited');
+        
+        // Show unlock next button if not the last node
+        if (nodeIdx < nodeButtons.length - 1) {
+          btnNext.style.display = 'none';
+          btnUnlockNext.style.display = 'block';
+        }
       }
     } catch (err) {
       console.error('Submit error:', err);
     }
   }
 
-  // ── Next Concept ─────────────────────────────────────────
-  function nextConcept() {
+  function unlockNextPhase() {
     if (!activeTopic) return;
     const topics = ['Voter Registration', 'Primaries', 'Campaigning', 'Election Day', 'Certification'];
+    const emojis = ['📋', '🗳️', '📢', '🏛️', '✅'];
     const currentIdx = topics.indexOf(activeTopic);
-    const nextIdx = (currentIdx + 1) % topics.length;
-    const nextTopic = topics[nextIdx];
-
-    // Highlight next node
-    nodeButtons.forEach((b) => b.classList.remove('active'));
-    nodeButtons[nextIdx].classList.add('active');
-
-    openPanel(nextTopic);
+    const nextIdx = currentIdx + 1;
+    
+    if (nextIdx < topics.length) {
+      const nextBtn = nodeButtons[nextIdx];
+      const nextNode = nextBtn.closest('.timeline-node');
+      
+      // Unlock it
+      nextBtn.disabled = false;
+      nextBtn.textContent = emojis[nextIdx];
+      nextNode.classList.remove('locked');
+      
+      closePanel();
+      setTimeout(() => {
+        nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          nodeButtons.forEach((b) => b.classList.remove('active'));
+          nextBtn.classList.add('active');
+          openPanel(topics[nextIdx]);
+        }, 500);
+      }, 300);
+    }
   }
 
   // ── Settings Modal ───────────────────────────────────────
@@ -321,10 +346,10 @@
     });
   });
 
-  panelClose.addEventListener('click', closePanel);
   panelOverlay.addEventListener('click', closePanel);
   btnSubmit.addEventListener('click', submitAnswer);
-  btnNext.addEventListener('click', nextConcept);
+  btnNext.addEventListener('click', closePanel);
+  btnUnlockNext.addEventListener('click', unlockNextPhase);
   btnSettings.addEventListener('click', openSettings);
   btnSaveKey.addEventListener('click', saveKey);
   btnClearKey.addEventListener('click', clearKey);
@@ -335,7 +360,26 @@
     onboardingOverlay.classList.remove('open');
     onboardingOverlay.setAttribute('aria-hidden', 'true');
   }
-  btnLoginGoogle.addEventListener('click', startApp);
+  
+  function loginGoogle() {
+    const navActions = $('.nav-actions');
+    const avatar = document.createElement('div');
+    avatar.style.width = '32px';
+    avatar.style.height = '32px';
+    avatar.style.borderRadius = '50%';
+    avatar.style.background = 'var(--accent)';
+    avatar.style.color = 'white';
+    avatar.style.display = 'flex';
+    avatar.style.alignItems = 'center';
+    avatar.style.justifyContent = 'center';
+    avatar.style.fontWeight = 'bold';
+    avatar.textContent = 'U';
+    avatar.title = 'Logged in as User';
+    navActions.insertBefore(avatar, navActions.firstChild);
+    startApp();
+  }
+
+  btnLoginGoogle.addEventListener('click', loginGoogle);
   btnStartGuest.addEventListener('click', startApp);
   onboardingEditSettings.addEventListener('click', openSettings);
 
