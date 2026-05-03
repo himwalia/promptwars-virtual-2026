@@ -36,6 +36,7 @@
   const btnClearKey = $('#btn-clear-key');
   const btnCloseModal = $('#btn-close-modal');
   const apiKeyInput = $('#api-key-input');
+  const modelSelect = $('#model-select');
   const stateBadge = $('#state-badge');
   const hudScore = $('#hud-score');
   const hudCorrect = $('#hud-correct');
@@ -242,6 +243,7 @@
     modalOverlay.classList.add('open');
     modalOverlay.setAttribute('aria-hidden', 'false');
     updateKeyStatus();
+    modelSelect.value = CivicAPI.getModel();
     setTimeout(() => apiKeyInput.focus(), 350);
   }
 
@@ -266,12 +268,14 @@
   }
 
   function saveKey() {
+    CivicAPI.setModel(modelSelect.value);
     const val = apiKeyInput.value;
-    if (CivicAPI.setApiKey(val)) {
+    if (val && val.trim()) {
+      CivicAPI.setApiKey(val);
       apiKeyInput.value = '';
-      updateKeyStatus();
-      closeSettings();
     }
+    updateKeyStatus();
+    closeSettings();
   }
 
   function clearKey() {

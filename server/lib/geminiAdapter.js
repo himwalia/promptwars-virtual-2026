@@ -75,8 +75,9 @@ function buildPrompt(state, topic) {
 async function callGeminiAPI(apiKey, prompt, options = {}) {
   const maxRetries = options.maxRetries ?? 1;
   const fetchFn = options.fetchFn || globalThis.fetch;
+  const modelId = options.modelId || 'gemini-3.1-pro-preview';
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
   const body = JSON.stringify({
     contents: [{ parts: [{ text: prompt }] }],
   });
@@ -141,10 +142,11 @@ async function handleExplainRequest(req, res) {
   }
 
   const { topic, state } = req.body || {};
+  const modelId = req.headers['x-gemini-model'] || 'gemini-3.1-pro-preview';
 
   try {
     const prompt = buildPrompt(state, topic);
-    const explanation = await callGeminiAPI(apiKey, prompt);
+    const explanation = await callGeminiAPI(apiKey, prompt, { modelId });
     return res.status(200).json({ explanation, state, topic });
   } catch (err) {
     if (err instanceof UnknownTopicError) {

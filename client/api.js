@@ -12,6 +12,8 @@ const CivicAPI = (() => {
     const h = { 'Content-Type': 'application/json' };
     const key = sessionStorage.getItem('civic_api_key');
     if (key) h['x-api-key'] = key;
+    const model = sessionStorage.getItem('civic_gemini_model');
+    if (model) h['x-gemini-model'] = model;
     return h;
   }
 
@@ -58,6 +60,14 @@ const CivicAPI = (() => {
 
     hasCustomKey() {
       return !!sessionStorage.getItem('civic_api_key');
+    },
+
+    setModel(modelId) {
+      if (modelId) sessionStorage.setItem('civic_gemini_model', modelId);
+    },
+
+    getModel() {
+      return sessionStorage.getItem('civic_gemini_model') || 'gemini-3.1-pro-preview';
     },
   };
 })();
