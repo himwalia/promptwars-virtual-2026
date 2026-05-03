@@ -308,6 +308,13 @@ body {
   background: var(--accent-dim);
   color: var(--accent-glow);
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); transform: scale(1.08); }
+  50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 0 45px rgba(16, 185, 129, 0.3); transform: scale(1.1); }
+  100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); transform: scale(1.08); }
 }
 
 .node-button.visited {
@@ -615,6 +622,105 @@ body {
 }
 .key-status .dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
 .key-status .dot.inactive { background: var(--text-muted); }
+
+/* ── Onboarding Modal ────────────────────────────────────── */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 23, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 400;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition);
+}
+.onboarding-overlay.open { opacity: 1; visibility: visible; }
+
+.onboarding-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: min(480px, 90vw);
+  padding: 40px;
+  text-align: center;
+  box-shadow: var(--shadow-glow);
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.onboarding-overlay.open .onboarding-modal { transform: scale(1) translateY(0); }
+
+.onboarding-modal h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.onboarding-modal p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.onboarding-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.btn-google {
+  background: white;
+  color: #333;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.btn-google:hover {
+  background: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.onboarding-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-link {
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color var(--transition);
+}
+.edit-link:hover { color: var(--accent-glow); }
+
+/* ── Footer ─────────────────────────────────────────────── */
+.site-footer {
+  text-align: center;
+  padding: 40px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 40px;
+}
+
+.site-footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.site-footer a:hover { text-decoration: underline; }
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 640px) {

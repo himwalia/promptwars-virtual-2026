@@ -41,6 +41,13 @@
   const hudScore = $('#hud-score');
   const hudCorrect = $('#hud-correct');
   const hudState = $('#hud-state');
+  
+  const onboardingOverlay = $('#onboarding-overlay');
+  const btnLoginGoogle = $('#btn-login-google');
+  const btnStartGuest = $('#btn-start-guest');
+  const onboardingKeyStatus = $('#onboarding-key-status');
+  const onboardingModelStatus = $('#onboarding-model-status');
+  const onboardingEditSettings = $('#onboarding-edit-settings');
 
   // ── Sample Questions per Topic ───────────────────────────
   const QUESTIONS = {
@@ -260,11 +267,24 @@
       dot.classList.remove('inactive');
       dot.classList.add('active');
       text.textContent = 'Custom key active — using your key';
+      onboardingKeyStatus.textContent = 'API key is configured (Custom Key)';
+      onboardingKeyStatus.style.color = 'var(--accent)';
     } else {
       dot.classList.remove('active');
       dot.classList.add('inactive');
       text.textContent = 'No custom key set — using server default';
+      onboardingKeyStatus.textContent = 'API key is configured (Server Default)';
+      onboardingKeyStatus.style.color = 'var(--text-muted)';
     }
+    
+    const models = {
+      'gemini-3.1-pro-preview': 'Gemini 3.1 Pro Preview',
+      'gemini-3.1-flash-lite-preview': 'Gemini 3.1 Flash Lite Preview',
+      'gemini-3-flash-preview': 'Gemini 3 Flash Preview',
+      'gemini-2.5-pro': 'Gemini 2.5 Pro',
+      'gemini-2.5-flash': 'Gemini 2.5 Flash'
+    };
+    onboardingModelStatus.textContent = models[CivicAPI.getModel()] || CivicAPI.getModel();
   }
 
   function saveKey() {
@@ -310,7 +330,18 @@
   btnClearKey.addEventListener('click', clearKey);
   btnCloseModal.addEventListener('click', closeSettings);
 
+  // Onboarding Events
+  function startApp() {
+    onboardingOverlay.classList.remove('open');
+    onboardingOverlay.setAttribute('aria-hidden', 'true');
+  }
+  btnLoginGoogle.addEventListener('click', startApp);
+  btnStartGuest.addEventListener('click', startApp);
+  onboardingEditSettings.addEventListener('click', openSettings);
+
   // ── Init ─────────────────────────────────────────────────
   updateHUD();
+  updateKeyStatus();
+  onboardingOverlay.classList.add('open');
   setTimeout(updateScrollProgress, 100);
 })();

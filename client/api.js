@@ -67,7 +67,7 @@ const CivicAPI = (() => {
     },
 
     getModel() {
-      return sessionStorage.getItem('civic_gemini_model') || 'gemini-3.1-pro-preview';
+      return sessionStorage.getItem('civic_gemini_model') || 'gemini-2.5-pro';
     },
   };
 })();
