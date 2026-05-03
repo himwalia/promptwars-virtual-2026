@@ -13,23 +13,22 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-    // Use environment variables or a default config placeholder if none provided.
-    // For PromptWars demo, we must rely on a valid config if real auth is requested,
-    // but the user's prompt suggests they want to "trigger the Firebase Auth signInWithPopup(googleProvider) function".
-    const firebaseConfig = {
-      apiKey: "AIzaSyDummyKeyForPromptWars",
-      authDomain: "promptwars-virtual-2026.firebaseapp.com",
-      projectId: "promptwars-virtual-2026",
-      storageBucket: "promptwars-virtual-2026.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef123456"
-    };
+    async function initFirebase() {
+      try {
+        const res = await fetch('/api/firebase-config');
+        const firebaseConfig = await res.json();
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-    window.firebaseAuth = { auth, provider, signInWithPopup, onAuthStateChanged, signOut };
+        window.firebaseAuth = { auth, provider, signInWithPopup, onAuthStateChanged, signOut };
+      } catch (err) {
+        console.error("Failed to initialize Firebase:", err);
+      }
+    }
+
+    initFirebase();
   </script>
 </head>
 <body>

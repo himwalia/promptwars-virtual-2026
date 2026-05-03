@@ -338,8 +338,10 @@
         navActions.insertBefore(avatar, navActions.firstChild);
         dismissOnboarding();
       } catch (error) {
-        console.error("Firebase Login Error:", error);
-        alert("Failed to sign in with Google: " + error.message);
+        console.error("Firebase Login Error Code:", error.code);
+        console.error("Firebase Login Error Message:", error.message);
+        console.error("Full Error:", error);
+        alert("Failed to sign in with Google: " + error.message + " (" + (error.code || 'unknown') + ")");
       }
     } else {
       // Fallback if firebase failed to load

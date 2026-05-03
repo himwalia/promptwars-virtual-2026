@@ -83,6 +83,18 @@ app.get('/api/topics', (_req, res) => {
   res.json({ topics: VALID_TOPICS });
 });
 
+// GET /api/firebase-config — Provide Firebase config to client
+app.get('/api/firebase-config', (_req, res) => {
+  res.json({
+    apiKey: process.env.FIREBASE_API_KEY || "AIzaSyDummyKeyForPromptWars",
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN || "promptwars-virtual-2026.firebaseapp.com",
+    projectId: process.env.FIREBASE_PROJECT_ID || "promptwars-virtual-2026",
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "promptwars-virtual-2026.appspot.com",
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "1234567890",
+    appId: process.env.FIREBASE_APP_ID || "1:1234567890:web:abcdef123456"
+  });
+});
+
 // Health check endpoint for Cloud Run
 app.get('/health', (_req, res) => {
   res.status(200).send('OK');
